@@ -6,6 +6,13 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRIPT="${ROOT}/bootstrap.sh"
 failures=0
 
+# Working trees edited on Windows can carry CRLF; strip for this process only.
+if grep -q $'\r' "${SCRIPT}" 2>/dev/null; then
+  TMP="$(mktemp)"
+  tr -d '\r' <"${SCRIPT}" >"${TMP}"
+  SCRIPT="${TMP}"
+fi
+
 pass() { echo "ok   - $1"; }
 fail() {
   echo "FAIL - $1"
@@ -38,8 +45,11 @@ check() {
 }
 
 check "--help exits 0 and prints usage" 0 "Usage: bootstrap.sh" --help
-check "--version exits 0 and prints version" 0 "server-bootstrap 0.0.1" --version
-check "--dry-run exits 0" 0 "no steps are implemented yet" --dry-run
+check "--version exits 0 and prints version" 0 "server-bootstrap 0.1.0" --version
+check "--list exits 0 and names the steps" 0 "fail2ban" --list
+check "--list includes ssh last among named steps" 0 "ssh" --list
+check "--only with an unknown step exits 2" 2 "unknown step" --only nope
+check "--skip with an unknown step exits 2" 2 "unknown step" --skip nope
 check "unknown flag exits non-zero" nonzero "unknown option" --bogus
 
 if [ "${failures}" -ne 0 ]; then

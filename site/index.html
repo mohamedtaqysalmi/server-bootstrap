@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>server-bootstrap — Ubuntu VPS steps</title>
+    <meta
+      name="description"
+      content="Idempotent Ubuntu VPS bootstrap: each step, what it protects against, and a post-run checklist."
+    />
+    <meta property="og:title" content="server-bootstrap" />
+    <meta
+      property="og:description"
+      content="Idempotent Ubuntu VPS setup. SSH last. Dry-run first."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://mohamedtaqysalmi.github.io/server-bootstrap/" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Saira+Condensed:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      (() => {
+        const stored = localStorage.getItem("sb-theme");
+        const preferDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = stored || (preferDark ? "dark" : "light");
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"></span>
+        <div>
+          <p class="product">server-bootstrap</p>
+          <p class="tag">Ubuntu VPS · idempotent · SSH last</p>
+        </div>
+      </div>
+      <nav aria-label="Primary">
+        <a href="https://github.com/mohamedtaqysalmi/server-bootstrap">Repository</a>
+        <a href="#steps">Steps</a>
+        <a href="#checklist">Checklist</a>
+        <button type="button" id="theme-toggle" aria-label="Toggle colour theme">Theme</button>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="eyebrow">Fresh Ubuntu 22.04 / 24.04</p>
+        <h1 id="hero-title">server-bootstrap</h1>
+        <p class="lede">
+          One bash script that sets up a VPS the way I actually want it: non-root user, firewall,
+          fail2ban, Docker, Caddy, and SSH hardening applied last with a lockout warning.
+        </p>
+        <div class="cta">
+          <a class="btn primary" href="https://github.com/mohamedtaqysalmi/server-bootstrap">View source</a>
+          <a class="btn ghost" href="#quickstart">Quickstart</a>
+        </div>
+        <pre class="panel" tabindex="0"><code>sudo BOOTSTRAP_SSH_PUBKEY="$(cat ~/.ssh/id_ed25519.pub)" ./bootstrap.sh --dry-run</code></pre>
+      </section>
+
+      <section id="quickstart" class="block" aria-labelledby="qs-title">
+        <h2 id="qs-title">Quickstart</h2>
+        <p>Dry-run first. Real run second. Keep the first SSH session open until a second login works.</p>
+        <pre class="panel" tabindex="0"><code>git clone https://github.com/mohamedtaqysalmi/server-bootstrap.git
+cd server-bootstrap
+sudo BOOTSTRAP_SSH_PUBKEY="$(cat ~/.ssh/id_ed25519.pub)" ./bootstrap.sh --dry-run
+sudo BOOTSTRAP_SSH_PUBKEY="$(cat ~/.ssh/id_ed25519.pub)" BOOTSTRAP_CONFIRM_SSH=1 ./bootstrap.sh</code></pre>
+      </section>
+
+      <section id="steps" class="block" aria-labelledby="steps-title">
+        <h2 id="steps-title">Steps</h2>
+        <p>Order matters. Expand a row for why it exists and what re-running does.</p>
+        <div id="step-list" class="step-list"></div>
+      </section>
+
+      <section id="not-secure" class="block warn-block" aria-labelledby="ns-title">
+        <h2 id="ns-title">What this does NOT secure</h2>
+        <ul>
+          <li>Application bugs and broken auth in your own code</li>
+          <li>Compromised apt mirrors or Docker images</li>
+          <li>Cloud security groups (UFW is only on the host)</li>
+          <li>Secrets management, backups, or full IDS</li>
+          <li>Kernel/sysctl hardening beyond the listed steps</li>
+        </ul>
+      </section>
+
+      <section id="checklist" class="block" aria-labelledby="cl-title">
+        <h2 id="cl-title">After you run it</h2>
+        <p>
+          Download the verification checklist and tick it from a second SSH session before you
+          disconnect the first one.
+        </p>
+        <a class="btn primary" href="checklist.md" download="server-bootstrap-checklist.md">Download checklist</a>
+      </section>
+
+      <section class="block" aria-labelledby="built-title">
+        <h2 id="built-title">How I built it</h2>
+        <ol class="decisions">
+          <li>Plain bash over Ansible so a reader can audit every command without a control node.</li>
+          <li>SSH change is last, warned, confirmed, and checked with <code>sshd -T</code>.</li>
+          <li>Caddy instead of Nginx+certbot for short automatic HTTPS config.</li>
+          <li>Container tests assert dry-run is a no-op and a second real run makes no changes.</li>
+        </ol>
+      </section>
+
+      <section class="block" aria-labelledby="limits-title">
+        <h2 id="limits-title">Limits</h2>
+        <p>
+          CI does not reload a live sshd or enable UFW on a real NIC. Those paths need a throwaway
+          VPS. Let's Encrypt needs a public DNS name pointing at the host.
+        </p>
+        <p>
+          Roadmap lives in
+          <a href="https://github.com/mohamedtaqysalmi/server-bootstrap/issues">GitHub issues</a>.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        <a href="https://github.com/mohamedtaqysalmi/server-bootstrap">GitHub</a>
+        ·
+        <a href="https://github.com/mohamedtaqysalmi">@mohamedtaqysalmi</a>
+        ·
+        <a href="https://www.linkedin.com/in/mohamedtaqysalmi">LinkedIn</a>
+      </p>
+    </footer>
+    <script src="app.js"></script>
+  </body>
+</html>

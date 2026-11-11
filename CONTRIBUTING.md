@@ -6,7 +6,7 @@ Thanks for looking. This is solo-maintained, so replies to issues and pull reque
 
 - Every step must be idempotent: running it twice leaves the server exactly as after the first run.
 - Every step must support `--dry-run`: it prints what it would change and changes nothing.
-- The SSH change is applied last and verified before the old settings are discarded. Do not reorder that.
+- The SSH change is applied last and verified before you rely on it. Do not reorder that.
 - Plain bash only, no extra dependencies on the target server.
 
 ## Lint and test locally
@@ -17,15 +17,9 @@ You need `shellcheck` and `shfmt`.
 shellcheck $(git ls-files '*.sh')
 shfmt -d $(git ls-files '*.sh')
 bash tests/test_cli.sh
+docker run --rm -e BOOTSTRAP_TEST_IN_CONTAINER=1 -v "$PWD":/src:ro -w /src \
+  ubuntu:24.04 bash tests/test_steps.sh
 ```
-
-CI runs the same checks, with the test inside an `ubuntu:24.04` container. To do that yourself:
-
-```bash
-docker run --rm -v "$PWD":/work -w /work ubuntu:24.04 bash tests/test_cli.sh
-```
-
-Optionally install the hooks in `.pre-commit-config.yaml` with `pre-commit install`.
 
 Never run `bootstrap.sh` on a machine you care about while testing. Use a container or a throwaway VM.
 

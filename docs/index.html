@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>server-bootstrap</title>
+    <meta
+      name="description"
+      content="Idempotent Ubuntu VPS bootstrap: dry-run, explained steps, SSH hardening last."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+    <header class="hero">
+      <p class="brand">server-bootstrap</p>
+      <h1>Harden a fresh Ubuntu VPS without guessing the order.</h1>
+      <p class="lede">
+        Idempotent bash steps with a real dry-run. SSH keys-only lands last,
+        after a lockout warning you have to acknowledge.
+      </p>
+      <p class="cta">
+        <a class="button" href="https://github.com/mohamedtaqysalmi/server-bootstrap">View on GitHub</a>
+        <a class="button ghost" href="checklist.md" download>Download checklist</a>
+      </p>
+    </header>
+
+    <main>
+      <section aria-labelledby="steps-title">
+        <h2 id="steps-title">Steps and why they exist</h2>
+        <p class="section-lede">
+          Each step names the failure mode it reduces. Re-run the script any
+          time; finished work prints <code>ok</code> and changes nothing.
+        </p>
+        <ol class="steps">
+          <li>
+            <h3>user</h3>
+            <p>Stop day-to-day work as root so a mistake or stolen session is not the whole machine.</p>
+          </li>
+          <li>
+            <h3>swap</h3>
+            <p>Give a small VPS a pressure valve so the OOM killer is less likely to kill services.</p>
+          </li>
+          <li>
+            <h3>unattended-upgrades</h3>
+            <p>Patch known vulnerabilities even when nobody logs in to run apt.</p>
+          </li>
+          <li>
+            <h3>fail2ban</h3>
+            <p>Slow down password-guessing bots hammering SSH.</p>
+          </li>
+          <li>
+            <h3>log-rotation</h3>
+            <p>Cap journal growth so logs cannot fill the disk and take the box down.</p>
+          </li>
+          <li>
+            <h3>ufw</h3>
+            <p>Default-deny inbound traffic; allow SSH, HTTP and HTTPS on purpose.</p>
+          </li>
+          <li>
+            <h3>docker</h3>
+            <p>Provide an isolated runtime and bound container log size.</p>
+          </li>
+          <li>
+            <h3>proxy</h3>
+            <p>Terminate TLS with Caddy (default) or Nginx+certbot so apps are not exposed raw.</p>
+          </li>
+          <li>
+            <h3>monitoring</h3>
+            <p>Optional node exporter so CPU, memory and disk pressure are visible before outage.</p>
+          </li>
+          <li>
+            <h3>ssh</h3>
+            <p>Keys-only, no root login — applied last, after verify warning, so you do not lock yourself out.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="use-title">
+        <h2 id="use-title">Try it</h2>
+        <pre><code>./bootstrap.sh --list
+sudo ./bootstrap.sh --dry-run
+sudo BOOTSTRAP_SSH_PUBKEY="$(cat ~/.ssh/id_ed25519.pub)" ./bootstrap.sh</code></pre>
+      </section>
+    </main>
+
+    <footer>
+      <p>Mohamed-Taqy Salmi · MIT · <a href="https://github.com/mohamedtaqysalmi/server-bootstrap">source</a></p>
+    </footer>
+    <script src="motion.js"></script>
+  </body>
+</html>
