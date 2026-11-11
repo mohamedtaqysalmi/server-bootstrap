@@ -23,7 +23,7 @@ usage() {
   cat <<USAGE
 Usage: bootstrap.sh [options]
 
-Setup for a fresh Ubuntu VPS (22.04 or 24.04). Safe to run again: steps that
+Setup for a fresh Ubuntu VPS (24.04). Safe to run again: steps that
 are already done report "ok" and change nothing.
 
 SSH hardening runs last. It can lock you out. Read the warning it prints, keep

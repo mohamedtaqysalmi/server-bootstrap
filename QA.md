@@ -25,7 +25,7 @@ docker run --rm -e BOOTSTRAP_TEST_IN_CONTAINER=1 -v "$PWD":/src:ro -w /src \
 
 ## Manual VPS pass (before trusting SSH hardening)
 
-On a throwaway Ubuntu 22.04 or 24.04 VM:
+On a throwaway Ubuntu 24.04 VM:
 
 - [ ] `sudo ./bootstrap.sh --dry-run` shows the intended plan
 - [ ] Export `BOOTSTRAP_SSH_PUBKEY` (or install a root key) and run without SSH:

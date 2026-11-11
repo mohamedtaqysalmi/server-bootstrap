@@ -3,7 +3,7 @@
 
 # Tests point this at a fake file to exercise the unsupported-OS path.
 OS_RELEASE_FILE="${OS_RELEASE_FILE:-/etc/os-release}"
-SUPPORTED_UBUNTU_VERSIONS="22.04 24.04"
+SUPPORTED_UBUNTU_VERSIONS="24.04"
 APT_UPDATED=0
 
 os_field() {
