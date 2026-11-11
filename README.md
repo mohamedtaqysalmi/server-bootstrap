@@ -1,6 +1,6 @@
 # server-bootstrap
 
-Idempotent, re-runnable setup for a fresh Ubuntu 22.04/24.04 VPS, with a
+Idempotent, re-runnable setup for a fresh Ubuntu 24.04 VPS, with a
 dry-run mode and every step explained.
 
 **Status: v0.1.0.** Plain bash on purpose ([ADR 0001](docs/adr/0001-shell-over-ansible.md)).

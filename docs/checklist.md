@@ -4,7 +4,7 @@ Print or save this before you touch a production-like VPS.
 
 ## Before you start
 
-- [ ] Throwaway or recoverable Ubuntu 22.04 / 24.04 host
+- [ ] Throwaway or recoverable Ubuntu 24.04 host
 - [ ] Provider console / VNC available if SSH fails
 - [ ] SSH public key ready (`BOOTSTRAP_SSH_PUBKEY` or root `authorized_keys`)
 - [ ] Optional: `BOOTSTRAP_DOMAIN`, `BOOTSTRAP_ACME_EMAIL`, `BOOTSTRAP_PROXY=caddy|nginx|none`
