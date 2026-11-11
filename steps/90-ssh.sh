@@ -67,7 +67,7 @@ AllowUsers ${BOOTSTRAP_USER}"
   fi
 
   if ! command -v sshd >/dev/null 2>&1; then
-    pkg_install openssh-serve
+    pkg_install openssh-server
   fi
 
   if ! out="$(sshd -t 2>&1)"; then
