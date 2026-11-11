@@ -10,3 +10,4 @@ and this project aims to follow [Semantic Versioning](https://semver.org/spec/v2
 ### Added
 
 - Project scaffold: `bootstrap.sh` with `--help`, `--version` and `--dry-run`, and a CLI test.
+- Community files (contributing guide, code of conduct, security policy, issue and PR templates), CODEOWNERS, Dependabot for GitHub Actions, and a CI workflow running shellcheck, shfmt and the CLI test.
