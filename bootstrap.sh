@@ -20,22 +20,22 @@ DRY_RUN=0
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --help | -h)
-      usage
-      exit 0
-      ;;
-    --version)
-      echo "server-bootstrap ${VERSION}"
-      exit 0
-      ;;
-    --dry-run)
-      DRY_RUN=1
-      ;;
-    *)
-      echo "bootstrap.sh: unknown option: $1" >&2
-      usage >&2
-      exit 2
-      ;;
+  --help | -h)
+    usage
+    exit 0
+    ;;
+  --version)
+    echo "server-bootstrap ${VERSION}"
+    exit 0
+    ;;
+  --dry-run)
+    DRY_RUN=1
+    ;;
+  *)
+    echo "bootstrap.sh: unknown option: $1" >&2
+    usage >&2
+    exit 2
+    ;;
   esac
   shift
 done
