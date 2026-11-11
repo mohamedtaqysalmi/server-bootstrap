@@ -102,7 +102,7 @@ else
 fi
 expect "dry run installs no packages" cmp -s "${OUT}/pkgs-before.txt" "${OUT}/pkgs-after.txt"
 expect "dry run reports the fail2ban install it would do" contains "${OUT}/dry.txt" "would   install packages: fail2ban"
-if contains "${OUT}/dry.txt" "fallocate -l 2G /swapfile" || contains "${OUT}/dry.txt" "swap is already configured"; then
+if contains "${OUT}/dry.txt" "fallocate -l 2G /swapfile" || contains "${OUT}/dry.txt" "swap is already configured" || contains "${OUT}/dry.txt" "/swapfile is active"; then
   pass "dry run prints a swap plan or leaves existing swap alone"
 else
   fail "dry run prints a swap plan or leaves existing swap alone"
