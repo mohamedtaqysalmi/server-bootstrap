@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="server-bootstrap: idempotent setup for a fresh Ubuntu 24.04 VPS">
+  <rect width="1200" height="630" fill="#131210"/>
+  <rect x="80" y="80" width="12" height="470" fill="#ff9478"/>
+  <text x="130" y="290" font-family="Consolas, Menlo, monospace" font-size="84" font-weight="700" fill="#ece9e2">server-bootstrap</text>
+  <text x="130" y="370" font-family="Segoe UI, Arial, sans-serif" font-size="36" fill="#ff9478">Idempotent setup for a fresh Ubuntu 24.04 VPS</text>
+  <text x="130" y="520" font-family="Segoe UI, Arial, sans-serif" font-size="28" fill="#a8a399">Plain bash · dry-run · SSH hardening last</text>
+</svg>

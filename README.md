@@ -38,7 +38,7 @@ Optional knobs: `BOOTSTRAP_PROXY=caddy|nginx|none`, `BOOTSTRAP_DOMAIN`,
 ## Docs
 
 - Operator checklist (downloadable): [docs/checklist.md](docs/checklist.md)
-- Pages site source: [docs/index.html](docs/index.html)
+- Pages site source: [site/](site/)
 - QA before release: [QA.md](QA.md)
 - Contributing / local checks: [CONTRIBUTING.md](CONTRIBUTING.md)
 

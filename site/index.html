@@ -1,136 +1,549 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>server-bootstrap — Ubuntu VPS steps</title>
+    <title>server-bootstrap: re-runnable setup for a fresh Ubuntu 24.04 VPS</title>
     <meta
       name="description"
-      content="Idempotent Ubuntu VPS bootstrap: each step, what it protects against, and a post-run checklist."
+      content="A plain bash script that sets up a fresh Ubuntu 24.04 VPS in ten steps, with a dry-run mode, a second run that reports no changes, and SSH hardening applied last."
     />
     <meta property="og:title" content="server-bootstrap" />
     <meta
       property="og:description"
-      content="Idempotent Ubuntu VPS setup. SSH last. Dry-run first."
+      content="Idempotent, re-runnable setup for a fresh Ubuntu 24.04 VPS, with a dry-run mode and every step explained."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mohamedtaqysalmi.github.io/server-bootstrap/" />
-    <meta name="twitter:card" content="summary" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Saira+Condensed:wght@600;700&display=swap"
-      rel="stylesheet"
+    <meta property="og:image" content="https://mohamedtaqysalmi.github.io/server-bootstrap/og.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="server-bootstrap" />
+    <meta
+      name="twitter:description"
+      content="Idempotent, re-runnable setup for a fresh Ubuntu 24.04 VPS, with a dry-run mode and every step explained."
     />
-    <link rel="stylesheet" href="styles.css" />
-    <script>
-      (() => {
-        const stored = localStorage.getItem("sb-theme");
-        const preferDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.dataset.theme = stored || (preferDark ? "dark" : "light");
-      })();
-    </script>
+    <meta name="twitter:image" content="https://mohamedtaqysalmi.github.io/server-bootstrap/og.svg" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="base.css" />
+    <link rel="stylesheet" href="page.css" />
   </head>
   <body>
-    <a class="skip" href="#main">Skip to content</a>
-    <header class="top">
-      <div class="brand">
-        <span class="mark" aria-hidden="true"></span>
-        <div>
-          <p class="product">server-bootstrap</p>
-          <p class="tag">Ubuntu VPS · idempotent · SSH last</p>
-        </div>
-      </div>
-      <nav aria-label="Primary">
-        <a href="https://github.com/mohamedtaqysalmi/server-bootstrap">Repository</a>
+    <a class="skip-link" href="#steps">Skip to the steps</a>
+
+    <header class="wrap site-header">
+      <a class="brand" href="./">
+        <img src="favicon.svg" alt="" width="28" height="28" />
+        server-bootstrap
+      </a>
+      <nav class="site-nav" aria-label="Primary">
         <a href="#steps">Steps</a>
-        <a href="#checklist">Checklist</a>
-        <button type="button" id="theme-toggle" aria-label="Toggle colour theme">Theme</button>
+        <a href="#not-secured">Not secured</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="https://github.com/mohamedtaqysalmi/server-bootstrap">GitHub</a>
       </nav>
     </header>
 
-    <main id="main">
-      <section class="hero" aria-labelledby="hero-title">
-        <p class="eyebrow">Fresh Ubuntu 24.04</p>
-        <h1 id="hero-title">server-bootstrap</h1>
+    <main>
+      <section class="wrap hero">
+        <p class="eyebrow">Bash · Ubuntu 24.04 · idempotent</p>
+        <h1>Set up a fresh Ubuntu VPS the same way every time, and prove the re-run changes nothing.</h1>
         <p class="lede">
-          One bash script that sets up a VPS the way I actually want it: non-root user, firewall,
-          fail2ban, Docker, Caddy, and SSH hardening applied last with a lockout warning.
+          I kept doing the same first hour on every new server: a non-root user, a firewall,
+          fail2ban, updates, Docker, a reverse proxy, then SSH hardening. This is that hour as one
+          bash script you can read top to bottom. It has a dry-run mode, and a second run reports
+          "No changes were needed".
         </p>
-        <div class="cta">
-          <a class="btn primary" href="https://github.com/mohamedtaqysalmi/server-bootstrap">View source</a>
-          <a class="btn ghost" href="#quickstart">Quickstart</a>
+        <p class="callout">
+          Ubuntu 24.04 only. I have not yet run it on a real VPS: it is tested in an
+          <code>ubuntu:24.04</code> container, which cannot cover swap, UFW or a live SSH reload.
+          Try it on a throwaway server first.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#steps">Read the ten steps</a>
+          <a class="btn" href="https://github.com/mohamedtaqysalmi/server-bootstrap">View the code</a>
         </div>
-        <pre class="panel" tabindex="0"><code>sudo BOOTSTRAP_SSH_PUBKEY="$(cat ~/.ssh/id_ed25519.pub)" ./bootstrap.sh --dry-run</code></pre>
+        <dl class="facts">
+          <div>
+            <dt>release</dt>
+            <dd>v0.1.0</dd>
+          </div>
+          <div>
+            <dt>tests</dt>
+            <dd>7 CLI + 42 step checks</dd>
+          </div>
+          <div>
+            <dt>supported</dt>
+            <dd>Ubuntu 24.04</dd>
+          </div>
+          <div>
+            <dt>license</dt>
+            <dd>MIT</dd>
+          </div>
+        </dl>
       </section>
 
-      <section id="quickstart" class="block" aria-labelledby="qs-title">
-        <h2 id="qs-title">Quickstart</h2>
-        <p>Dry-run first. Real run second. Keep the first SSH session open until a second login works.</p>
-        <pre class="panel" tabindex="0"><code>git clone https://github.com/mohamedtaqysalmi/server-bootstrap.git
+      <section class="wrap section" id="steps" aria-labelledby="steps-title">
+        <div class="section-head">
+          <span class="section-label">01</span>
+          <h2 id="steps-title">The ten steps, in run order</h2>
+        </div>
+        <div class="section-body flow">
+          <p>
+            Each step is one file in <code>steps/</code>. Open one to see what it protects against
+            and how to check it afterwards. Run <code>./bootstrap.sh --list</code> to print the
+            same order from the script itself.
+          </p>
+          <div class="steps">
+            <details class="step">
+              <summary>
+                <span class="idx">1</span>
+                <span class="name">user</span>
+                <span class="protects">Day-to-day work as root, where one mistake or one stolen session owns the machine.</span>
+              </summary>
+              <div class="step-body">
+                <p>
+                  Creates a non-root account (<code>deploy</code> by default, set
+                  <code>BOOTSTRAP_USER</code>), adds it to <code>sudo</code>, and installs your
+                  public key. File: <code>steps/05-user.sh</code>.
+                </p>
+                <h3>Verify</h3>
+                <pre><code>id deploy
+sudo ls -l /home/deploy/.ssh/authorized_keys</code></pre>
+                <p class="hint">
+                  Expect <code>sudo</code> in the groups and a key file with mode <code>-rw-------</code>.
+                </p>
+              </div>
+            </details>
+
+            <details class="step">
+              <summary>
+                <span class="idx">2</span>
+                <span class="name">swap</span>
+                <span class="protects">The kernel OOM killer stopping services when a small VPS runs out of memory.</span>
+              </summary>
+              <div class="step-body">
+                <p>
+                  Creates a 2 GiB swap file (<code>SWAP_SIZE</code>, <code>SWAP_FILE</code>) and
+                  adds it to <code>/etc/fstab</code>. It leaves existing swap alone and checks
+                  free disk first. File: <code>steps/10-swap.sh</code>.
+                </p>
+                <h3>Verify</h3>
+                <pre><code>swapon --show
+grep swapfile /etc/fstab</code></pre>
+                <p class="hint">
+                  Not covered by the container tests: containers skip this step, so the real
+                  creation path is untested.
+                </p>
+              </div>
+            </details>
+
+            <details class="step">
+              <summary>
+                <span class="idx">3</span>
+                <span class="name">unattended-upgrades</span>
+                <span class="protects">Known vulnerabilities staying unpatched because nobody logged in to run apt upgrade.</span>
+              </summary>
+              <div class="step-body">
+                <p>
+                  Installs the package and enables daily updates. Automatic reboot is off on
+                  purpose: a kernel update only applies after a reboot, and when that happens is
+                  your call. File: <code>steps/20-unattended-upgrades.sh</code>.
+                </p>
+                <h3>Verify</h3>
+                <pre><code>cat /etc/apt/apt.conf.d/20auto-upgrades
+systemctl list-timers 'apt-daily*'</code></pre>
+              </div>
+            </details>
+
+            <details class="step">
+              <summary>
+                <span class="idx">4</span>
+                <span class="name">fail2ban</span>
+                <span class="protects">Password-guessing bots hammering SSH, by banning an address after repeated failures.</span>
+              </summary>
+              <div class="step-body">
+                <p>
+                  Installs fail2ban and writes a drop-in jail: ban for one hour after five
+                  failures in ten minutes, reading the systemd journal. The config is checked with
+                  <code>fail2ban-client -t</code> before the service is touched. File:
+                  <code>steps/30-fail2ban.sh</code>.
+                </p>
+                <h3>Verify</h3>
+                <pre><code>sudo fail2ban-client status sshd</code></pre>
+              </div>
+            </details>
+
+            <details class="step">
+              <summary>
+                <span class="idx">5</span>
+                <span class="name">log-rotation</span>
+                <span class="protects">Logs filling the disk until the server stops working.</span>
+              </summary>
+              <div class="step-body">
+                <p>
+                  Installs logrotate and caps the systemd journal at 500 MB and one month. Ubuntu
+                  already rotates files in <code>/var/log</code>. File:
+                  <code>steps/40-log-rotation.sh</code>.
+                </p>
+                <h3>Verify</h3>
+                <pre><code>cat /etc/systemd/journald.conf.d/50-server-bootstrap.conf
+journalctl --disk-usage
+logrotate --debug /etc/logrotate.conf</code></pre>
+              </div>
+            </details>
+
+            <details class="step">
+              <summary>
+                <span class="idx">6</span>
+                <span class="name">ufw</span>
+                <span class="protects">Unexpected inbound services being reachable from the internet.</span>
+              </summary>
+              <div class="step-body">
+                <p>
+                  Default-deny inbound, then allows SSH, 80 and 443, then enables the firewall.
+                  SSH is allowed before the firewall turns on. File: <code>steps/50-ufw.sh</code>.
+                </p>
+                <h3>Verify</h3>
+                <pre><code>sudo ufw status verbose</code></pre>
+                <p class="hint">
+                  Expect <code>Status: active</code> and default deny (incoming). Not covered by
+                  the container tests: containers skip this step.
+                </p>
+              </div>
+            </details>
+
+            <details class="step">
+              <summary>
+                <span class="idx">7</span>
+                <span class="name">docker</span>
+                <span class="protects">Workloads running without isolation, and unbounded container logs filling the disk.</span>
+              </summary>
+              <div class="step-body">
+                <p>
+                  Installs Ubuntu's own <code>docker.io</code> and compose packages, so there is
+                  no third-party apt source to audit. Caps each container log at 10 MB times
+                  three files, and adds the bootstrap user to the <code>docker</code> group. File:
+                  <code>steps/60-docker.sh</code>.
+                </p>
+                <h3>Verify</h3>
+                <pre><code>cat /etc/docker/daemon.json
+docker info | grep -i 'logging driver'</code></pre>
+                <p class="hint">Run <code>docker info</code> after logging in again, so the group change applies.</p>
+              </div>
+            </details>
+
+            <details class="step">
+              <summary>
+                <span class="idx">8</span>
+                <span class="name">proxy</span>
+                <span class="protects">Serving apps without TLS, and certificates you have to renew by hand.</span>
+              </summary>
+              <div class="step-body">
+                <p>
+                  Installs Caddy (default) or Nginx with certbot (<code>BOOTSTRAP_PROXY</code>),
+                  or nothing with <code>none</code>. With <code>BOOTSTRAP_DOMAIN</code> set it
+                  proxies to <code>BOOTSTRAP_PROXY_UPSTREAM</code> over HTTPS. Without a domain it
+                  writes a port 80 placeholder. File: <code>steps/70-proxy.sh</code>.
+                </p>
+                <h3>Verify</h3>
+                <pre><code>caddy validate --config /etc/caddy/Caddyfile
+curl -I http://127.0.0.1</code></pre>
+                <p class="hint">
+                  With Nginx use <code>nginx -t</code>. Certificate issuance needs a public DNS
+                  name and is not tested in CI.
+                </p>
+              </div>
+            </details>
+
+            <details class="step">
+              <summary>
+                <span class="idx">9</span>
+                <span class="name">monitoring</span>
+                <span class="protects">Not noticing CPU, memory or disk pressure until the site is already down.</span>
+              </summary>
+              <div class="step-body">
+                <p>
+                  Optional, off unless <code>ENABLE_MONITORING=1</code>. Installs Ubuntu's
+                  <code>prometheus-node-exporter</code> on its localhost default. It opens no
+                  firewall port. File: <code>steps/80-monitoring.sh</code>.
+                </p>
+                <h3>Verify</h3>
+                <pre><code>curl -s http://127.0.0.1:9100/metrics | head</code></pre>
+              </div>
+            </details>
+
+            <details class="step">
+              <summary>
+                <span class="idx">10</span>
+                <span class="name">ssh</span>
+                <span class="protects">Password guessing and root login over SSH. Runs last, because it can lock you out.</span>
+              </summary>
+              <div class="step-body">
+                <p>
+                  Writes a drop-in that turns off root login and password auth. It prints a
+                  lockout warning, refuses if the bootstrap user has no key, and needs
+                  <code>BOOTSTRAP_CONFIRM_SSH=1</code> when not run interactively. It checks the
+                  file with <code>sshd -t</code>, restores the old one if that fails, then
+                  confirms the live settings with <code>sshd -T</code>. File:
+                  <code>steps/90-ssh.sh</code>.
+                </p>
+                <h3>Verify</h3>
+                <pre><code>sudo sshd -T | grep -E 'permitrootlogin|passwordauthentication|pubkeyauthentication'
+ssh deploy@your-server   # from a second terminal, before closing the first</code></pre>
+                <p class="hint">
+                  Only the refusal and the dry-run warning are tested in the container. A live
+                  sshd reload and second-session login are not.
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="wrap section" aria-labelledby="status-title">
+        <div class="section-head">
+          <span class="section-label">02</span>
+          <h2 id="status-title">What works</h2>
+        </div>
+        <div class="section-body flow">
+          <ul class="status">
+            <li>
+              <span class="tag tag-ok">works</span>
+              <span>Dry run: prints each change it would make and writes nothing. A container test compares file checksums before and after.</span>
+            </li>
+            <li>
+              <span class="tag tag-ok">works</span>
+              <span>Re-run: the second real run in the test container exits 0 and reports "No changes were needed".</span>
+            </li>
+            <li>
+              <span class="tag tag-ok">works</span>
+              <span><code>--list</code>, <code>--only</code> and <code>--skip</code> to select steps; refuses non-root real runs and anything but Ubuntu 24.04.</span>
+            </li>
+            <li>
+              <span class="tag tag-partial">partial</span>
+              <span>Tested in an <code>ubuntu:24.04</code> container, not on a VPS. Swap, UFW enablement, service restarts and a live SSH reload are not exercised.</span>
+            </li>
+            <li>
+              <span class="tag tag-partial">partial</span>
+              <span>Nginx with certbot is written but certificate issuance is not tested; Caddy is the default path.</span>
+            </li>
+            <li>
+              <span class="tag tag-no">not done</span>
+              <span>Ubuntu 22.04: the proxy step failed there because Caddy is not in its archive, so the script refuses it.</span>
+            </li>
+          </ul>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Suite</th>
+                  <th scope="col" class="num">Checks</th>
+                  <th scope="col">Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>tests/test_cli.sh</code></td>
+                  <td class="num">7</td>
+                  <td>7 pass</td>
+                </tr>
+                <tr>
+                  <td><code>tests/test_steps.sh</code> in <code>ubuntu:24.04</code></td>
+                  <td class="num">42</td>
+                  <td>42 pass</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="hint">
+            From <a href="https://github.com/mohamedtaqysalmi/server-bootstrap/blob/main/TEST_REPORT.md">TEST_REPORT.md</a>,
+            run on 2026-11-11 with Docker 29.9.2. The same two suites, plus shellcheck and shfmt, run in CI on every pull request.
+          </p>
+        </div>
+      </section>
+
+      <section class="wrap section" id="not-secured" aria-labelledby="not-title">
+        <div class="section-head">
+          <span class="section-label">03</span>
+          <h2 id="not-title">What this does NOT secure</h2>
+        </div>
+        <div class="section-body flow">
+          <div class="callout not-secured">
+            <p>
+              This is a starting point for one Ubuntu VPS, not a security program. It does not:
+            </p>
+            <ul>
+              <li>Replace your provider's firewall, security groups or DDoS protection. UFW only filters on the host.</li>
+              <li>Protect against zero-days, a compromised apt package, or an image that was already bad when you booted it.</li>
+              <li>Set up intrusion detection, EDR, auditd rules, AppArmor policy or integrity monitoring.</li>
+              <li>Manage secrets, vaults, SSH certificate authorities or hardware keys.</li>
+              <li>Guarantee you cannot lock yourself out. The SSH step can cut off password and root login; prove key login in a second session first.</li>
+              <li>Secure your applications: no WAF, headers, database auth or image scanning. Docker and the proxy only prepare a place to run them.</li>
+              <li>Open or secure monitoring ports. The node exporter stays on localhost until you decide otherwise.</li>
+              <li>Give you compliance evidence for PCI, HIPAA or SOC 2.</li>
+              <li>Update itself. Pull a new release and re-run it.</li>
+              <li>Recover a broken server. Keep your provider's console access available.</li>
+            </ul>
+          </div>
+          <p>
+            The same list is in
+            <a href="https://github.com/mohamedtaqysalmi/server-bootstrap/blob/main/SECURITY.md">SECURITY.md</a>,
+            along with how to report a vulnerability privately.
+          </p>
+        </div>
+      </section>
+
+      <section class="wrap section" id="quickstart" aria-labelledby="quick-title">
+        <div class="section-head">
+          <span class="section-label">04</span>
+          <h2 id="quick-title">Quickstart</h2>
+        </div>
+        <div class="section-body flow">
+          <p>
+            Use a throwaway Ubuntu 24.04 server, with your provider's console available. Apply
+            everything except SSH, prove key login from a second terminal, then harden SSH.
+          </p>
+          <div class="code">
+            <pre id="quickstart-code"><code>git clone https://github.com/mohamedtaqysalmi/server-bootstrap
 cd server-bootstrap
-sudo BOOTSTRAP_SSH_PUBKEY="$(cat ~/.ssh/id_ed25519.pub)" ./bootstrap.sh --dry-run
-sudo BOOTSTRAP_SSH_PUBKEY="$(cat ~/.ssh/id_ed25519.pub)" BOOTSTRAP_CONFIRM_SSH=1 ./bootstrap.sh</code></pre>
+./bootstrap.sh --list
+sudo ./bootstrap.sh --dry-run
+sudo BOOTSTRAP_SSH_PUBKEY="$(cat ~/.ssh/id_ed25519.pub)" ./bootstrap.sh --skip ssh
+# open a second terminal and log in as deploy with your key, then:
+sudo BOOTSTRAP_CONFIRM_SSH=1 ./bootstrap.sh --only ssh
+sudo ./bootstrap.sh   # second run: expect "No changes were needed"</code></pre>
+            <button class="btn btn-small copy" type="button" data-copy="quickstart-code">Copy</button>
+          </div>
+          <div class="badges">
+            <a href="https://github.com/mohamedtaqysalmi/server-bootstrap/actions/workflows/ci.yml"
+              ><img
+                alt="CI status"
+                width="110"
+                height="20"
+                src="https://github.com/mohamedtaqysalmi/server-bootstrap/actions/workflows/ci.yml/badge.svg"
+            /></a>
+          </div>
+        </div>
       </section>
 
-      <section id="steps" class="block" aria-labelledby="steps-title">
-        <h2 id="steps-title">Steps</h2>
-        <p>Order matters. Expand a row for why it exists and what re-running does.</p>
-        <div id="step-list" class="step-list"></div>
+      <section class="wrap section" id="checklist" aria-labelledby="check-title">
+        <div class="section-head">
+          <span class="section-label">05</span>
+          <h2 id="check-title">Post-run checklist</h2>
+        </div>
+        <div class="section-body flow">
+          <p>
+            A Markdown checklist to tick from a second SSH session before you close the first:
+            key login, sudo, UFW, sshd settings, fail2ban, Docker, the proxy, swap, unattended
+            upgrades, and the provider firewall and console.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="checklist.md" download="server-bootstrap-checklist.md">Download the checklist</a>
+          </div>
+        </div>
       </section>
 
-      <section id="not-secure" class="block warn-block" aria-labelledby="ns-title">
-        <h2 id="ns-title">What this does NOT secure</h2>
-        <ul>
-          <li>Application bugs and broken auth in your own code</li>
-          <li>Compromised apt mirrors or Docker images</li>
-          <li>Cloud security groups (UFW is only on the host)</li>
-          <li>Secrets management, backups, or full IDS</li>
-          <li>Kernel/sysctl hardening beyond the listed steps</li>
-        </ul>
+      <section class="wrap section" aria-labelledby="how-title">
+        <div class="section-head">
+          <span class="section-label">06</span>
+          <h2 id="how-title">How it works</h2>
+        </div>
+        <div class="section-body flow">
+          <p>
+            <code>bootstrap.sh</code> loads the helpers in <code>lib/</code>, checks the OS and
+            root, then sources each file in <code>steps/</code> in name order. Every change goes
+            through one counter, which is how a re-run can say it changed nothing.
+          </p>
+          <pre class="diagram" role="img" aria-label="Flow: parse flags, check Ubuntu 24.04 and root, run each step file in order, print a summary of changes. In dry-run, changes are printed instead of run.">bootstrap.sh --dry-run | --only | --skip
+   │
+   ├─ check: Ubuntu 24.04? root? (dry run needs no root)
+   │
+   ├─ for each steps/NN-name.sh, in order:
+   │     already as wanted?  ──► "ok" (nothing counted)
+   │     otherwise           ──► "change" (counted)
+   │                              dry run: print the command
+   │                              real run: back up the file, then do it
+   │
+   └─ summary: "N change(s) made" or "No changes were needed"</pre>
+        </div>
       </section>
 
-      <section id="checklist" class="block" aria-labelledby="cl-title">
-        <h2 id="cl-title">After you run it</h2>
-        <p>
-          Download the verification checklist and tick it from a second SSH session before you
-          disconnect the first one.
-        </p>
-        <a class="btn primary" href="checklist.md" download="server-bootstrap-checklist.md">Download checklist</a>
+      <section class="wrap section" aria-labelledby="built-title">
+        <div class="section-head">
+          <span class="section-label">07</span>
+          <h2 id="built-title">How I built it</h2>
+        </div>
+        <div class="section-body">
+          <div class="notes">
+            <article>
+              <h3>Plain bash, not Ansible</h3>
+              <p>
+                I wanted one dependency-free script that a reader can audit top to bottom on a
+                fresh server before running it as root. Ansible would handle idempotency for me,
+                but it is one more thing to install and trust. The cost is that I wrote the
+                idempotency helpers myself and test them in a container.
+              </p>
+            </article>
+            <article>
+              <h3>SSH hardening runs last</h3>
+              <p>
+                Turning off password login before a key works is how people lock themselves out.
+                The step refuses without a key, asks for confirmation, validates with
+                <code>sshd -t</code>, restores the old file on failure, and checks
+                <code>sshd -T</code> afterwards.
+              </p>
+            </article>
+            <article>
+              <h3>One wrapper for every change</h3>
+              <p>
+                Steps do not call mutating commands directly. They go through
+                <code>run</code>, which prints instead of executing under <code>--dry-run</code>,
+                and the file helpers back up before they overwrite. That keeps dry-run honest.
+              </p>
+            </article>
+            <article>
+              <h3>Caddy as the default proxy</h3>
+              <p>
+                Caddy gets and renews HTTPS certificates from a short Caddyfile, so the default path
+                stays short enough to audit. Nginx with certbot is there for people who already use it.
+              </p>
+            </article>
+          </div>
+        </div>
       </section>
 
-      <section class="block" aria-labelledby="built-title">
-        <h2 id="built-title">How I built it</h2>
-        <ol class="decisions">
-          <li>Plain bash over Ansible so a reader can audit every command without a control node.</li>
-          <li>SSH change is last, warned, confirmed, and checked with <code>sshd -T</code>.</li>
-          <li>Caddy instead of Nginx+certbot for short automatic HTTPS config.</li>
-          <li>Container tests assert dry-run is a no-op and a second real run makes no changes.</li>
-        </ol>
-      </section>
-
-      <section class="block" aria-labelledby="limits-title">
-        <h2 id="limits-title">Limits</h2>
-        <p>
-          CI does not reload a live sshd or enable UFW on a real NIC. Those paths need a throwaway
-          VPS. Let's Encrypt needs a public DNS name pointing at the host.
-        </p>
-        <p>
-          Roadmap lives in
-          <a href="https://github.com/mohamedtaqysalmi/server-bootstrap/issues">GitHub issues</a>.
-        </p>
+      <section class="wrap section" aria-labelledby="limits-title">
+        <div class="section-head">
+          <span class="section-label">08</span>
+          <h2 id="limits-title">Limits and roadmap</h2>
+        </div>
+        <div class="section-body flow">
+          <ul>
+            <li>It has not been run on a real VPS yet. That is the next thing I want to do, and I will record the result in the test report.</li>
+            <li>One server, one run at a time. There is no inventory and no remote execution.</li>
+            <li>The Lighthouse scores in the test report are still pending.</li>
+          </ul>
+          <p>
+            Open work is in the
+            <a href="https://github.com/mohamedtaqysalmi/server-bootstrap/issues">issues</a>. To
+            change a step, start with
+            <a href="https://github.com/mohamedtaqysalmi/server-bootstrap/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>:
+            every step has to be idempotent and support dry-run.
+          </p>
+        </div>
       </section>
     </main>
 
-    <footer>
+    <footer class="wrap site-footer">
       <p>
-        <a href="https://github.com/mohamedtaqysalmi/server-bootstrap">GitHub</a>
-        ·
-        <a href="https://github.com/mohamedtaqysalmi">@mohamedtaqysalmi</a>
-        ·
+        Built by <a href="https://github.com/mohamedtaqysalmi">Mohamed-Taqy Salmi</a> ·
         <a href="https://www.linkedin.com/in/mohamedtaqysalmi">LinkedIn</a>
       </p>
+      <p>
+        MIT licensed · <a href="https://github.com/mohamedtaqysalmi/server-bootstrap">Source on GitHub</a>
+      </p>
     </footer>
-    <script src="app.js"></script>
+
+    <script src="base.js" defer></script>
   </body>
 </html>
