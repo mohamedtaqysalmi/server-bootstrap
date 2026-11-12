@@ -1,17 +1,11 @@
-/* server-bootstrap: accent colour and step-list rules. Everything else is base.css. */
-
-:root {
-  --accent-light: #a8321e;
-  --accent-dark: #ff9478;
-}
+/* server-bootstrap: layout rules for the step list. Everything else is base.css. */
 
 .steps {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: 1px solid var(--line-soft);
 }
 
 .step {
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--line-soft);
 }
 .step:last-child {
   border-bottom: 0;
@@ -19,39 +13,14 @@
 
 .step summary {
   display: grid;
-  grid-template-columns: 2.25rem minmax(0, 1fr);
-  gap: 0.25rem 0.75rem;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.25rem 0.5rem;
   align-items: baseline;
-  padding: 0.85rem 1rem;
+  padding: 0.6rem 0.75rem;
   cursor: pointer;
-  list-style: none;
-}
-.step summary::-webkit-details-marker {
-  display: none;
-}
-.step summary:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
-}
-.step summary:hover {
-  background: var(--surface);
-}
-
-.step .idx {
-  font: 500 var(--step--1) / 1.6 var(--mono);
-  color: var(--muted);
 }
 .step .name {
-  font-family: var(--mono);
-  font-weight: 600;
-}
-.step .name::after {
-  content: "+";
-  float: right;
-  color: var(--accent);
-}
-.step[open] .name::after {
-  content: "\2212";
+  font-weight: 700;
 }
 .step .protects {
   grid-column: 2;
@@ -59,34 +28,26 @@
 }
 
 .step-body {
-  padding: 0 1rem 1rem 3.75rem;
+  padding: 0 0.75rem 0.75rem 3.25rem;
   display: grid;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
 .step-body h3 {
-  font: 500 var(--step--1) / 1.4 var(--mono);
-  color: var(--muted);
   margin: 0;
 }
 .step-body pre {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--line-soft);
   background: var(--surface);
   overflow-x: auto;
-  line-height: 1.5;
 }
 
 @media (max-width: 40rem) {
   .step-body {
-    padding-left: 1rem;
+    padding-left: 0.75rem;
   }
 }
 
 .not-secured {
-  border-left-color: var(--bad);
   max-width: none;
-}
-.not-secured ul {
-  margin-top: 0.5rem;
 }
