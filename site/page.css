@@ -1,0 +1,53 @@
+/* server-bootstrap: layout rules for the step list. Everything else is base.css. */
+
+.steps {
+  border: 1px solid var(--line-soft);
+}
+
+.step {
+  border-bottom: 1px solid var(--line-soft);
+}
+.step:last-child {
+  border-bottom: 0;
+}
+
+.step summary {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.25rem 0.5rem;
+  align-items: baseline;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+}
+.step .name {
+  font-weight: 700;
+}
+.step .protects {
+  grid-column: 2;
+  color: var(--muted);
+}
+
+.step-body {
+  padding: 0 0.75rem 0.75rem 3.25rem;
+  display: grid;
+  gap: 0.6rem;
+}
+.step-body h3 {
+  margin: 0;
+}
+.step-body pre {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--line-soft);
+  background: var(--surface);
+  overflow-x: auto;
+}
+
+@media (max-width: 40rem) {
+  .step-body {
+    padding-left: 0.75rem;
+  }
+}
+
+.not-secured {
+  max-width: none;
+}

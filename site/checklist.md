@@ -1,17 +1,25 @@
-# server-bootstrap post-run checklist
+# Post-run verification checklist
 
-Tick from a second SSH session before disconnecting the first.
+Print or save this after `sudo ./bootstrap.sh`. Tick each item from a **second** SSH session when possible.
 
-- [ ] Key login works as BOOTSTRAP_USER
-- [ ] sudo works for that user
-- [ ] ufw status: SSH (+ 80/443) allowed, active
-- [ ] sshd -T: PermitRootLogin no, PasswordAuthentication no, PubkeyAuthentication yes
-- [ ] fail2ban-client status sshd
-- [ ] docker info (re-login after docker group)
-- [ ] Caddy responds on :80 or your HTTPS domain
-- [ ] swapon --show (real VPS)
-- [ ] apt-config dump | grep Unattended-Upgrade
-- [ ] Provider firewall allows the SSH port
-- [ ] Console / VNC recovery still available
+## Before you disconnect the first session
 
-Full notes: https://github.com/mohamedtaqysalmi/server-bootstrap/blob/main/docs/post-run-checklist.md
+- [ ] `BOOTSTRAP_USER` can log in with a key (`ssh deploy@HOST`)
+- [ ] `sudo -n true` works for that user (if passwordless sudo was left on)
+- [ ] `sudo ufw status` shows SSH (and 80/443) allowed, status active
+- [ ] `sshd -T | grep -E 'permitrootlogin|passwordauthentication|pubkeyauthentication|port'` matches expectations
+- [ ] fail2ban: `sudo fail2ban-client status sshd` (or status) without errors
+- [ ] Docker: `docker info` as the bootstrap user (re-login after group add)
+- [ ] Caddy: `curl -I http://127.0.0.1` or your domain over HTTPS
+- [ ] Swap: `swapon --show` (on a real VPS, not a container)
+- [ ] Unattended upgrades: `apt-config dump | grep Unattended-Upgrade`
+- [ ] Optional monitoring: `curl -s http://127.0.0.1:9100/metrics | head` only if enabled
+
+## Cloud provider
+
+- [ ] Provider firewall / security group allows the SSH port you configured
+- [ ] Console / VNC recovery still works if SSH fails
+
+## What to keep open
+
+Do not close the original root/sudo session until the second session proves login, sudo, and (if changed) the new SSH port.
